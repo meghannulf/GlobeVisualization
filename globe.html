@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html>
-    <head>
-    <link type="image/png" rel="icon" href="//portal.gplates.org/static/img/GPlates-icon.png">
-    <meta charset="utf-8">
-    <style>
+<style>
     path {
       stroke: blue;
-      stroke-width: 0.25px;
+      stroke-width: 0.55px;
       fill: grey;
     }
 
@@ -15,7 +10,7 @@
     }
 
     svg {
-        border: solid black 1px;
+        border: solid black 5px;
         display: block;
         margin: 0px auto;
         margin-bottom:20px;
@@ -44,13 +39,65 @@
 
     body {
         font-family: Arial, Helvetica, sans-serif;
-      }
+    }
+
+    #dropdown-container {
+        border: 4px solid black;
+        background-color: gray;
+        padding: 10px;
+        width: 300px;
+        margin-bottom: 20px;
+    }
+
+    #data-select option {
+    font-size: 16px;
+    }
+
+    /* Default style for the geologic time scale */
+    #geotime-scale .geotime-bar {
+    display: inline-block;
+    height: 20px;
+    margin-right: 1px;
+    }
+
+    /* Adjust the width of the first 541 million years */
+    #geotime-scale .scale-0_541 {
+    width: 20%;
+    }
+
+    /* Set the width for the rest of the scale */
+    #geotime-scale .scale-541_4000 {
+    width: 10%;
+    }
+
+    /* Media query for screens with a width less than or equal to 768px */
+    @media (max-width: 768px) {
+    /* Adjust the width of the first 541 million years */
+    #geotime-scale .scale-0_541 {
+        width: 10%;
+    }
+    
+    /* Set the width for the rest of the scale */
+    #geotime-scale .scale-541_4000 {
+        width: 20%;
+    }
+    }
+
 
     </style>
     </head>
+    <div id="dropdown-container">
+        <h2>Select Reconstruction Model</h2>
+        <select id="data-select" onchange="onSelectChange()">
+          <option value="PALEOMAP">PALEOMAP</option>
+          <option value="MERDITH2021">MERDITH2021</option>
+          <option value="MULLER2022">MULLER2022</option>
+        </select>
+      </div>  
+    
 <body data-view-name=points>
     <!--<div style="width:960px; text-align: center; margin:0 auto;"><h1 id="time-label" style="font-size:3em;margin:0;">145 Ma</h1></div>-->
-	<div style="width:962px; overflow:hidden; margin:0 auto;">
+	<div style="width:962px; margin: auto;">
         <svg style="width:960px; height:500px;"></svg><!--960,500-->
         <div style="text-align:center;">
             <label>Time:</label>
@@ -58,12 +105,20 @@
             <input type="button" id="commit" value="Refresh Map"/>
         </div>
     </div>
-    <div id="geoTimeFullWidth" style="width: 962px; margin: auto; " ></div>
+    <style>
+        .time-interval--before-541 {
+          width: 30%;
+        }
+        </style>
+        
+        <div class="time-interval time-interval--before-541" style="--time-interval-start: 100;"></div>
+        <div id="geoTimeFullWidth" style="margin: auto; margin-top: 50px"></div>
+    </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
 <script src="https://d3js.org/d3.v3.min.js"></script>
 <script src="https://d3js.org/topojson.v1.min.js"></script>
 <script type="module" src="../static/js/gssp/geo-timescale-master/dist/index.module.js"></script>
-<!--<script type="module" src="../static/js/gssp/geo-timescale-master/dist/index.cjs"></script>-->
+<--<script type="module" src="../static/js/gssp/geo-timescale-master/dist/index.cjs"></script>-->
 <script type="module">
   import { geoTimescale } from "../static/js/gssp/geo-timescale-master/dist/index.module.js";
   //import { geoTimescale } from "../static/js/gssp/geo-timescale-master/src/index.js";
@@ -73,11 +128,11 @@
 <script>
 //设置本地路径 这里需要用google chrome extension  Web Server for chrome 设置好文件服务的路径。
 //var local_Path ="http://127.0.0.1:8887/";
+
+var dataName = "PALEOMAP"; // or any default value you want
 var local_CoastlinePath = "./GlobeVisualization/static/js/gssp/coastlines_data/" + dataName + "/";
 var local_GSSPPath = "./GlobeVisualization/static/js/gssp/spikes_data/" + dataName + "/";
 
-var width = 960,
-    height = 500;
 var width = 960,
     height = 500;
 
@@ -116,7 +171,7 @@ $( document ).ready(function() {
 
     var time = +$('#recon-time').val(); 
     //转换成从本地读取地图数据加载
-    local_reconstruct(time);
+    local_reconstruct(time, dataName);
 
     var m0,
         o0;
@@ -154,24 +209,32 @@ function createDropdown() {
                  .on("change", onSelectChange);
 
   // Add an option element for each data name
-  var dataNames = ["PALEOMAP", "MERDITH2021", "MULLER2022"];
+  var dataName = ["PALEOMAP", "MERDITH2021", "MULLER2022"];
   select.selectAll("option")
-        .data(dataNames)
+        .data(dataName)
         .enter()
         .append("option")
         .text(function(d) { return d; });
 
   // Set the initial selected option to be the first option
-  select.property("value", dataNames[0]);
+  select.property("value", dataName[0]);
 }
 
 //data seletion functoin
 function onSelectChange() {
-  // Get the selected data name
-  var dataName = d3.select(this).property("value");
+  // Get the selected value from the dropdown
+  var selectedValue = d3.select(this).property("value");
 
-  // Do something with the selected data name, e.g. load data
-  loadData(dataName);
+  // Update the global dataName variable
+  dataName = selectedValue;
+
+  // Update the file paths using the new dataName value
+  local_CoastlinePath = "./GlobeVisualization/static/gssp/coastlines_data/" + dataName + "/";
+  local_GSSPPath = "./GlobeVisualization/static/js/gssp/spikes_data/" + dataName + "/";
+
+
+  // Call the function to update the visualization with the new data
+  updateVisualization();
 }
 
     function setupZoom(){

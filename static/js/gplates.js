@@ -61,8 +61,8 @@ function initGraph(time, points) {
 }
 
 //d3 showing
-function reconstructPoints(time, points) {
-    var url = "https://gws.gplates.org/reconstruct/reconstruct_points/?points=" + points + "&time=" + time + "&model=SETON2012";
+function reconstructPoints(time, points, dataName) {
+    var url = "https://gws.gplates.org/reconstruct/reconstruct_points/?points=" + points + "&time=" + time + "&model=" +dataName;
     $("#request-url").html("<strong>Request URL:</strong> <br> <a href=\"" + url + "\" target=\"_blank\">" + url);
     d3.json(url, function (error, data) {
         $("#raw-data").html('<strong>Returned Raw Data:</strong> <pre>' + JSON.stringify(data, undefined, 4) + '</pre>');
@@ -77,8 +77,8 @@ function reconstructPoints(time, points) {
     });
 }
 
-function reconstruct(time, points) {
-    d3.json("https://gws.gplates.org/reconstruct/static_polygons/?time=" + time + '&model=PALEOMAP', function (error, topology) {
+function reconstruct(time, points, dataName) {
+    d3.json("https://gws.gplates.org/reconstruct/static_polygons/?time=" + time + '&model=' + dataName, function (error, topology) {
         coastlinsLayer.selectAll(".coastline").remove();
         coastlinsLayer.selectAll(".coastline")
                 .data(topology.features)
@@ -101,7 +101,7 @@ function reconstruct(time, points) {
                     d3.select(this).style('stroke-width', '.25px');
                 });
     });
-    reconstructPoints(time, points);
+    reconstructPoints(time, points, dataName);
 }
 
 
