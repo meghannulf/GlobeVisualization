@@ -73,7 +73,11 @@
 <script>
 //设置本地路径 这里需要用google chrome extension  Web Server for chrome 设置好文件服务的路径。
 //var local_Path ="http://127.0.0.1:8887/";
-var local_Path ="./static/js/gssp/";
+var local_CoastlinePath = "./GlobeVisualization/static/js/gssp/coastlines_data/" + dataName + "/";
+var local_GSSPPath = "./GlobeVisualization/static/js/gssp/spikes_data/" + dataName + "/";
+
+var width = 960,
+    height = 500;
 var width = 960,
     height = 500;
 
@@ -142,6 +146,34 @@ $( document ).ready(function() {
     
     setupZoom();
 
+function createDropdown() {
+  // Add a select element to the body
+  var select = d3.select("body")
+                 .append("select")
+                 .attr("id", "data-select")
+                 .on("change", onSelectChange);
+
+  // Add an option element for each data name
+  var dataNames = ["PALEOMAP", "MERDITH2021", "MULLER2022"];
+  select.selectAll("option")
+        .data(dataNames)
+        .enter()
+        .append("option")
+        .text(function(d) { return d; });
+
+  // Set the initial selected option to be the first option
+  select.property("value", dataNames[0]);
+}
+
+//data seletion functoin
+function onSelectChange() {
+  // Get the selected data name
+  var dataName = d3.select(this).property("value");
+
+  // Do something with the selected data name, e.g. load data
+  loadData(dataName);
+}
+
     function setupZoom(){
         if(projName != "orthographic"){
             scale0 = eScale0;
@@ -182,8 +214,8 @@ $( document ).ready(function() {
 
 var reconstructedPoints=[];
 
-function reconstruct_local_Points(time){
-    var local_url =  local_Path+"spikes/"+ time +"ma_spikes.geojson"
+function reconstruct_local_Points(time, dataName){
+    var local_url =  local_GSSPPath + dataName + "/" + time + "ma.geojson";
     d3.json(local_url, function(error, data){
         geometryLayer.selectAll("*").remove();
         var circle = d3.geo.circle();
@@ -195,6 +227,7 @@ function reconstruct_local_Points(time){
         });
     });
 }
+
 
 function drawPoint(d, angle){
     var _angle = angle || 1;
@@ -210,34 +243,33 @@ function drawPoint(d, angle){
     
 }
 
-function local_reconstruct(time){
-  local_filePath = local_Path+"coastlines/"+ time +"ma.geojson"
+function local_reconstruct(time, dataName){
+  local_filePath = local_CoastlinePath + dataName + "/" + time + "ma.geojson";
   d3.json(local_filePath, function(error, topology) {
-        coastlinsLayer.selectAll(".coastline").remove();
-        coastlinsLayer.selectAll(".coastline")
-                .data(topology.features)
-            .attr("class", "coastlines")
-            .attr("d", path)
-        .enter()
-                .append("path")
-            .attr("d",path)
-                .attr("class", "coastline")
-        .on('mouseover', function(d, i) {
-            d3.select(this).style('fill-opacity', .7);
-            d3.select(this).style('stroke', 'red');
-            d3.select(this).style('stroke-width', '1px');
-        })
-
-        .on('mouseout', function(d, i) {
-            d3.select(this).style({'fill-opacity':.5});
-            d3.select(this).style('stroke', 'blue');
-            d3.select(this).style('stroke-width', '.25px');
-        });
-    });
-    reconstruct_local_Points(time);
-    
-  
+    coastlinsLayer.selectAll(".coastline").remove();
+    coastlinsLayer.selectAll(".coastline")
+      .data(topology.features)
+      .attr("class", "coastlines")
+      .attr("d", path)
+      .enter()
+      .append("path")
+      .attr("d",path)
+      .attr("class", "coastline")
+      .on('mouseover', function(d, i) {
+        d3.select(this).style('fill-opacity', .7);
+        d3.select(this).style('stroke', 'red');
+        d3.select(this).style('stroke-width', '1px');
+      })
+      .on('mouseout', function(d, i) {
+        d3.select(this).style({'fill-opacity':.5});
+        d3.select(this).style('stroke', 'blue');
+        d3.select(this).style('stroke-width', '.25px');
+      });
+  });
+  reconstruct_local_Points(time, dataName);
 }
+
+
 
 function draw(){
 	//设置为球面展示
@@ -252,9 +284,9 @@ function draw(){
 }
 
 d3.select('#commit').on('click', function(){
-    local_reconstruct($("#recon-time").val());
-    $("#time-label").html($("#recon-time").val()+' Ma');
-    
+    var dataName = $("#data-selection").val(); // Get the selected data name
+    local_reconstruct($("#recon-time").val(), dataName); // Pass the selected data name to the local_reconstruct function
+    $("#time-label").html($("#recon-time").val()+' ma');
 });
 
 });
