@@ -130,8 +130,11 @@
 //var local_Path ="http://127.0.0.1:8887/";
 
 var dataName = "PALEOMAP"; // or any default value you want
-var local_CoastlinePath = "./GlobeVisualization/static/js/gssp/coastlines_data/" + dataName + "/";
-var local_GSSPPath = "./GlobeVisualization/static/js/gssp/spikes_data/" + dataName + "/";
+// modified
+// var local_CoastlinePath = "./GlobeVisualization/static/js/gssp/coastlines_data/" + dataName + "/";
+// var local_GSSPPath = "./GlobeVisualization/static/js/gssp/spikes_data/" + dataName + "/";
+var local_CoastlinePath = "./static/js/gssp/coastlines_data/";
+var local_GSSPPath = "./static/js/gssp/spikes_data/";
 
 var width = 960,
     height = 500;
@@ -347,7 +350,7 @@ function draw(){
 }
 
 d3.select('#commit').on('click', function(){
-    var dataName = $("#data-selection").val(); // Get the selected data name
+    var dataName = $("#data-select").val(); // Get the selected data name
     local_reconstruct($("#recon-time").val(), dataName); // Pass the selected data name to the local_reconstruct function
     $("#time-label").html($("#recon-time").val()+' ma');
 });
