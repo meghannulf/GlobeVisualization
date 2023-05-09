@@ -92,6 +92,7 @@
           <option value="PALEOMAP">PALEOMAP</option>
           <option value="MERDITH2021">MERDITH2021</option>
           <option value="MULLER2022">MULLER2022</option>
+          <option valie="SETON2012">SETON2012</option>
         </select>
       </div>  
     
@@ -212,7 +213,7 @@ function createDropdown() {
                  .on("change", onSelectChange);
 
   // Add an option element for each data name
-  var dataName = ["PALEOMAP", "MERDITH2021", "MULLER2022"];
+  var dataName = ["PALEOMAP", "MERDITH2021", "MULLER2022","SETON2012"];
   select.selectAll("option")
         .data(dataName)
         .enter()
@@ -232,7 +233,7 @@ function onSelectChange() {
   dataName = selectedValue;
 
   // Update the file paths using the new dataName value
-  local_CoastlinePath = "./GlobeVisualization/static/gssp/coastlines_data/" + dataName + "/";
+  local_CoastlinePath = "./GlobeVisualization/static/js/gssp/coastliness_data/" + dataName + "/";
   local_GSSPPath = "./GlobeVisualization/static/js/gssp/spikes_data/" + dataName + "/";
 
 
