@@ -92,7 +92,8 @@
           <option value="PALEOMAP">PALEOMAP</option>
           <option value="MERDITH2021">MERDITH2021</option>
           <option value="MULLER2022">MULLER2022</option>
-          <option valie="SETON2012">SETON2012</option>
+          <option value="SETON2012">SETON2012</option>
+          <option value-"MATTHEWS2016_mantle_ref">MATTHEWS2016_mantle_ref</option>
         </select>
       </div>  
     
@@ -213,7 +214,7 @@ function createDropdown() {
                  .on("change", onSelectChange);
 
   // Add an option element for each data name
-  var dataName = ["PALEOMAP", "MERDITH2021", "MULLER2022","SETON2012"];
+  var dataName = ["PALEOMAP", "MERDITH2021", "MULLER2022","SETON2012", "MATTHEWS2016_mantle_ref"];
   select.selectAll("option")
         .data(dataName)
         .enter()
